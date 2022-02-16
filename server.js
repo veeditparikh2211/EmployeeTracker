@@ -40,6 +40,7 @@ function Employeesdata() {
         type: "list",
         message: "What do you like to choose from below?",
         choices: [
+            "All Employees",
             "View all Employees",
             "View all Roles",
             "View all Roles By department",
@@ -47,13 +48,17 @@ function Employeesdata() {
             "Add Departments",
             "Add Role",
             "Add Employee",
-            "Update Employee",
+            "Delete Employee",
+            "Delete Role",
             "Quit",
         ],
 
     }).then(function(res) {
 
         switch (res.action) {
+            case "All Employees":
+                Employeelist();
+                break;
             case "View all Employees":
                 Employeesinfo();
                 break;
@@ -75,9 +80,13 @@ function Employeesdata() {
             case "Add Employee":
                 addemployee();
                 break;
-            case "Update Employee":
-                updateemployee();
+            case "Delete Employee":
+                deleteemployee();
                 break;
+            case "Delete Role":
+                deleterole();
+                break;
+
             case "Quit":
                 quit();
 
@@ -95,7 +104,19 @@ function Employeesinfo() {
     INNER JOIN role ON (role.id = employee.role_id)
     INNER JOIN department ON (department.id = role.department_id)
     ORDER BY employee.id;`;
-    console.log(query);
+    db.query(query, function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        Employeesdata();
+    });
+};
+
+// All Employees
+
+function Employeelist() {
+
+    var query = 'SELECT * FROM employee';
+
     db.query(query, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -108,7 +129,7 @@ function Employeesinfo() {
 function Rolesinfo() {
 
     var query = 'SELECT * FROM role';
-    console.log(query);
+
     db.query(query, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -124,7 +145,7 @@ function viewroles() {
     FROM employee LEFT JOIN role ON (role.id = employee.role_id) 
     LEFT JOIN department ON (department.id = role.department_id)
     ORDER BY role.title`;
-    console.log(query);
+
     db.query(query, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -137,7 +158,7 @@ function viewroles() {
 function Departmentinfo() {
 
     var query = 'SELECT * FROM department';
-    console.log(query);
+
     db.query(query, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -252,15 +273,62 @@ function addrole() {
     })
 };
 
-// Update a employee
+// Delete a employee
 
-function updateemployee() {
+function deleteemployee() {
+    db.query(`SELECT employee.first_name, employee.last_name, employee.id FROM employee;`, function(err, res) {
+        if (err) throw err;
+        let deleteemployee = res.map(({ id, first_name, last_name }) => ({
+            value: id,
+            name: `${id}${first_name}${last_name}`
+        }));
+        inquirer.prompt([{
+                type: 'list',
+                name: 'empID',
+                message: 'Which employee you want to remove?',
+                choices: deleteemployee
+            },
 
+        ]).then(function(res) {
+            db.query(`DELETE FROM employee WHERE ?`, {
+                    id: res.empID,
+                },
+                function(err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    console.log("Employee deleted", res);
+                    Employeesdata();
+                })
+
+        })
+    })
 };
 
+function deleterole() {
+    db.query(`SELECT * FROM role ORDER BY id ASC;`, function(err, res) {
+        if (err) throw err;
+        let deletedata = res.map(role => ({ name: role.title, value: role.id }));
+        inquirer.prompt([{
+                type: 'list',
+                name: 'title',
+                message: 'What type of role you want to remove?',
+                choices: deletedata
+            },
 
+        ]).then(function(res) {
+            db.query(`DELETE FROM role WHERE ?`, [{
+                    id: res.title,
+                }, ],
+                function(err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    console.log("Role deleted succesfully", res);
+                    Employeesdata();
+                })
 
-
+        })
+    })
+};
 
 function quit() {
     db.end();
