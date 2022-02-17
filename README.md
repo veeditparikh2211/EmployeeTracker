@@ -15,7 +15,7 @@ https://veeditparikh2211.github.io/EmployeeTracker/
 
 ## Video
 
-![](images/)
+![](images/employeetracker.gif.gif)
 
 ## Application
 
