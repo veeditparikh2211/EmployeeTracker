@@ -50,6 +50,7 @@ function Employeesdata() {
             "Add Employee",
             "Delete Employee",
             "Delete Role",
+            "Update Employee Role",
             "Quit",
         ],
 
@@ -82,6 +83,9 @@ function Employeesdata() {
                 break;
             case "Delete Employee":
                 deleteemployee();
+                break;
+            case "Update Employee Role":
+                updateemployee();
                 break;
             case "Delete Role":
                 deleterole();
@@ -330,8 +334,69 @@ function deleterole() {
     })
 };
 
+
+// update employe role
+
+function updateemployee() {
+
+    db.query(`SELECT employee.id, employee.first_name, employee.last_name, role.id AS "role_id"
+    FROM employee, role,department WHERE role.id = employee.role_id AND department.id = department_id;`,
+        (err, res) => {
+
+            if (err) throw err;
+            let updateemployees = [];
+            res.forEach((employee) => {
+                updateemployees.push(employee.id);
+
+            });
+            var query = `SELECT role.id, role.title FROM role`;
+            db.query(query, (err, res) => {
+                if (err) throw err;
+                let updateroles = [];
+                res.forEach((role) => {
+                    updateroles.push(role.title);
+                });
+                inquirer.prompt([{
+                        type: 'list',
+                        name: 'emp',
+                        message: 'Which employee you want to update the role',
+                        choices: updateemployees
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'What role you want to update for the employee',
+                        choices: updateroles
+                    },
+
+                ]).then((answer) => {
+                    var titleId, empId;
+                    res.forEach((role) => {
+
+                        if (answer.role === role.title) {
+                            titleId = role.id;
+                        }
+                    });
+                    res.forEach((employee) => {
+                        console.log("answer", answer.emp, "employee", employee);
+                        if (answer.emp === employee.id) {
+                            empId = employee.id;
+                        }
+                    });
+                    db.query(`UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`, [titleId, empId], (err, res) => {
+                        console.log("role updated", res);
+                        Employeesdata();
+                    });
+
+                });
+
+            });
+        });
+};
+
+
 function quit() {
     db.end();
-
 }
+
 Employeesdata();

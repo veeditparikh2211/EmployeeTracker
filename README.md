@@ -11,14 +11,19 @@ express
 inquirer
 ## Website
 
+https://veeditparikh2211.github.io/EmployeeTracker/
 
+## Video
+
+![](images/)
 
 ## Application
 
 ![](images/Screenshot_1.PNG)
 ![](images/Screenshot_2.PNG)
 
-
+## Reference
+https://github.com/deannapi/employee-tracker
 ## Contribution
 
 Made by Veedit Parikh
